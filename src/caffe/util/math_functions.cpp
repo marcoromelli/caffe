@@ -10,6 +10,24 @@
 namespace caffe {
 
 template<>
+void strided_cpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
+    const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
+    const float alpha, const float* A, const int lda, const float* B, const int ldb, const float beta,
+    float* C, const int ldc) {
+  cblas_sgemm(CblasRowMajor, TransA, TransB, M, N, K, alpha, A, lda, B,
+      ldb, beta, C, ldc);
+}
+
+template<>
+void strided_cpu_gemm<double>(const CBLAS_TRANSPOSE TransA,
+    const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
+    const double alpha, const double* A, const int lda, const double* B, const int ldb, const double beta,
+    double* C, const int ldc) {
+  cblas_dgemm(CblasRowMajor, TransA, TransB, M, N, K, alpha, A, lda, B,
+      ldb, beta, C, ldc);
+}
+
+template<>
 void caffe_cpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
     const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
     const float alpha, const float* A, const float* B, const float beta,
@@ -43,6 +61,18 @@ void caffe_cpu_gemv<double>(const CBLAS_TRANSPOSE TransA, const int M,
     const int N, const double alpha, const double* A, const double* x,
     const double beta, double* y) {
   cblas_dgemv(CblasRowMajor, TransA, M, N, alpha, A, N, x, 1, beta, y, 1);
+}
+
+template <>
+void strided_cpu_axpby<float>(const int N, const float alpha, const float* X, const int incX,
+        const float beta, float* Y, const int incY) {
+  cblas_saxpby(N, alpha, X, incX, beta, Y, incY);
+}
+
+template <>
+void strided_cpu_axpby<double>(const int N, const double alpha, const double* X, const int incX,
+        const double beta, double* Y, const int incY) {
+  cblas_daxpby(N, alpha, X, incX, beta, Y, incY);
 }
 
 template <>

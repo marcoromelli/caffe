@@ -16,6 +16,46 @@
 
 namespace caffe {
 
+template <typename Dtype>
+class MDLSTMLayer : public Layer<Dtype> {
+public:
+
+    explicit MDLSTMLayer(const LayerParameter& param)
+            : Layer<Dtype>(param) {}
+
+    virtual inline const char* type() const { return "MDLSTM"; }
+    virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+            const vector<Blob<Dtype>*>& top);
+    virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
+            const vector<Blob<Dtype>*>& top);
+
+    virtual inline int MinBottomBlobs() const { return 1; }
+    virtual inline int MinTopBlobs() const { return 1; }
+    virtual inline bool EqualNumBottomTopBlobs() const { return true; }
+
+protected:
+    virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+            const vector<Blob<Dtype>*>& top);
+    virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+            const vector<Blob<Dtype>*>& top);
+    virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+            const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+    virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+            const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+    virtual inline bool reverse_dimensions() { return false; }
+    //virtual void compute_output_shape() = 0;
+
+    int num_;  //number of hidden LSTM cells
+
+    vector<shared_ptr<Blob<Dtype> > > bh_;  //activations for cell output
+    vector<shared_ptr<Blob<Dtype> > > bi_;  //activations for input gate
+    vector<shared_ptr<Blob<Dtype> > > bz_;  //activations for cell input
+    vector<shared_ptr<Blob<Dtype> > > bo_;  //activations for output gate
+    vector<shared_ptr<Blob<Dtype> > > bf1_; //activations for forget gate 1
+    vector<shared_ptr<Blob<Dtype> > > bf2_; //activations for forget gate 2
+    vector<shared_ptr<Blob<Dtype> > > s_;   //cell state
+};
+
 /**
  * @brief Abstract base class that factors out the BLAS code common to
  *        ConvolutionLayer and DeconvolutionLayer.

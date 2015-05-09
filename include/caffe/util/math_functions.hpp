@@ -12,6 +12,16 @@
 
 namespace caffe {
 
+template <typename Dtype>
+void strided_cpu_gemm(const CBLAS_TRANSPOSE TransA,
+    const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
+    const Dtype alpha, const Dtype* A, const int lda, const Dtype* B, const int ldb, 
+    const Dtype beta, Dtype* C, const int ldc);
+
+template <typename Dtype>
+void strided_cpu_axpby(const int N, const Dtype alpha, const Dtype* X, const int incX,
+    const Dtype beta, Dtype* Y, const int incY);
+
 // Caffe gemm provides a simpler interface to the gemm functions, with the
 // limitation that the data has to be contiguous in memory.
 template <typename Dtype>
