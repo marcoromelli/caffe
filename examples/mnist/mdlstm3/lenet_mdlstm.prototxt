@@ -1,0 +1,203 @@
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "../../examples/mnist/mnist_train_lmdb"
+    batch_size: 64
+    backend: LMDB
+  }
+}
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "../../examples/mnist/mnist_test_lmdb"
+    batch_size: 50
+    backend: LMDB
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 150
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "mdlstm"
+  type: "MDLSTM"
+  bottom: "conv1"
+  top: "mdlstm"
+  mdlstm_param {
+    num_hidden: 30
+    weight_filler {
+      type: "gaussian"
+      mean: 0
+      std: 0.1
+    }
+  }
+}
+layer {
+  name: "mdlstm2"
+  type: "MDLSTM"
+  bottom: "conv1"
+  top: "mdlstm2"
+  mdlstm_param {
+    num_hidden: 30
+    weight_filler {
+      type: "gaussian"
+      mean: 0
+      std: 0.1
+    }
+    vertical_dir: DOWN
+    horizontal_dir: LEFT
+  }
+}
+layer {
+  name: "mdlstm3"
+  type: "MDLSTM"
+  bottom: "conv1"
+  top: "mdlstm3"
+  mdlstm_param {
+    num_hidden: 30
+    weight_filler {
+      type: "gaussian"
+      mean: 0
+      std: 0.1
+    }
+    vertical_dir: UP
+    horizontal_dir: LEFT
+  }
+}
+layer {
+  name: "mdlstm4"
+  type: "MDLSTM"
+  bottom: "conv1"
+  top: "mdlstm4"
+  mdlstm_param {
+    num_hidden: 30
+    weight_filler {
+      type: "gaussian"
+      mean: 0
+      std: 0.1
+    }
+    vertical_dir: UP
+    horizontal_dir: RIGHT
+  }
+}
+
+layer {
+  name: "conc"
+  type: "Concat"
+  bottom: "mdlstm"
+  bottom: "mdlstm2"
+  bottom: "mdlstm3"
+  bottom: "mdlstm4"
+  top: "conc"
+  concat_param {
+    concat_dim: 1
+  }
+}
+
+layer {
+  name: "fc1"
+  type: "InnerProduct"
+  bottom: "conc"
+  top: "fc1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 100
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+name: "relu1"
+type: "ReLU"
+bottom: "fc1"
+top: "fc1"
+}
+
+
+layer {
+  name: "fc2"
+  type: "InnerProduct"
+  bottom: "fc1"
+  top: "fc2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 10
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "fc2"
+  bottom: "label"
+  top: "accuracy"
+  include {
+    phase: TEST
+  }
+}
+layer {
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "fc2"
+  bottom: "label"
+  top: "loss"
+}

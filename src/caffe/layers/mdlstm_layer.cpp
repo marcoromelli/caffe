@@ -1,5 +1,7 @@
 #include <vector>
 #include <iostream>
+#include <iomanip>
+#include <numeric>
 
 #include "caffe/blob.hpp"
 #include "caffe/common.hpp"
@@ -244,6 +246,16 @@ for (int bottom_id = 0; bottom_id < bottom.size(); ++bottom_id) {
           s[e] = bi[e] * bz[e] +
                   (x != start_x ? s[idx_sx] : 0.) * bf1[e] +
                   (y != start_y ? s[idx_sy] : 0.) * bf2[e];
+//            if (isnan(s[e]) || isinf(s[e])) {
+//                LOG(INFO) << "x = " << x <<
+//                            " y = " << y << " s[" << e << "] = " << s[e] << " s[" << idx_sx << "] = " << s[idx_sx] << " s[" << idx_sy << "] = " << s[idx_sy];
+//                LOG(INFO) << x << " " << y << " " << i << bi[e] << " " << bz[e] << " bf1 = " << bf1[e] << " bf2 = " << bf2[e];
+//                char c = getchar();
+//            }
+            if (s[e] > 10.)
+                s[e] = 10.;
+            else if (s[e] < -10.)
+                s[e] = -10.;
           idx_sx += ld_step;
           idx_sy += ld_step;
         }
@@ -254,12 +266,31 @@ for (int bottom_id = 0; bottom_id < bottom.size(); ++bottom_id) {
         for (int e = start; e < end; e += ld_step) {
           top_data[e] = bo[e] * tanh(s[e]);
           bh[e] = bo[e] * tanh(s[e]);
+          if (isnan(bh[e]) || isinf(bh[e])) {
+              LOG(INFO) << "bh block: " << x << " " << y << " " << i << tanh(s[e]) << " " << bo[e];
+              char c = getchar();
+          }
         }
       }
     }
   }
 }
 //Logging code for debug (to remove later)
+    std::ofstream log_s;
+    log_s.open("/Users/snake91/Desktop/s.txt", ios::app);
+    const int count = s_[0]->count();
+    const Dtype *data_s = s_[0]->cpu_data();
+    Dtype min = *std::min_element(data_s, data_s + count);
+    Dtype max = *std::max_element(data_s, data_s + count);
+    Dtype mean = std::accumulate(data_s, data_s + count, 0.) / count;
+    log_s << min << "," << max << "," << mean << std::endl;
+//    for (int i = 0; i < count; ++i) {
+//        log_s << std::setw(15) << data_s[i];
+//        if ((i+1) % 160 == 0)
+//            log_s << "\n";
+//    }
+    log_s.close();
+//    char c = getchar();
 /*std::ofstream log_bi;
 std::ofstream log_bz;
 std::ofstream log_bo;

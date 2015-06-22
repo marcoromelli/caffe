@@ -109,7 +109,7 @@ TYPED_TEST(MDLSTMLayerTest, TestForward) {
   }
 }
 
-TYPED_TEST(MDLSTMLayerTest, TestGradient) {
+TYPED_TEST(MDLSTMLayerTest, TestGradient1) {
   typedef typename TypeParam::Dtype Dtype;
   bool IS_VALID_CUDA = false;
 #ifndef CPU_ONLY
@@ -121,10 +121,10 @@ TYPED_TEST(MDLSTMLayerTest, TestGradient) {
     MDLSTMParameter* mdlstm_param =
         layer_param.mutable_mdlstm_param();
     mdlstm_param->set_num_hidden(2);
-    mdlstm_param->mutable_weight_filler()->set_type("constant");
-    mdlstm_param->mutable_weight_filler()->set_value(3.);
-//    mdlstm_param->set_vertical_dir(MDLSTMParameter_VerticalDirection_UP);
-//    mdlstm_param->set_horizontal_dir(MDLSTMParameter_HorizontalDirection_LEFT);
+    mdlstm_param->mutable_weight_filler()->set_type("gaussian");
+//    mdlstm_param->mutable_weight_filler()->set_value(3.);
+//    mdlstm_param->set_vertical_dir(MDLSTMParameter_VerticalDirection_DOWN);
+//    mdlstm_param->set_horizontal_dir(MDLSTMParameter_HorizontalDirection_RIGHT);
     MDLSTMLayer<Dtype> layer(layer_param);
     GradientChecker<Dtype> checker(1e-2, 1e-3);
     checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
@@ -133,5 +133,81 @@ TYPED_TEST(MDLSTMLayerTest, TestGradient) {
     LOG(ERROR) << "Skipping test due to old architecture.";
   }
 }
+
+TYPED_TEST(MDLSTMLayerTest, TestGradient2) {
+  typedef typename TypeParam::Dtype Dtype;
+  bool IS_VALID_CUDA = false;
+#ifndef CPU_ONLY
+  IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
+#endif
+  if (Caffe::mode() == Caffe::CPU ||
+      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+    LayerParameter layer_param;
+    MDLSTMParameter* mdlstm_param =
+            layer_param.mutable_mdlstm_param();
+    mdlstm_param->set_num_hidden(2);
+    mdlstm_param->mutable_weight_filler()->set_type("gaussian");
+    // mdlstm_param->mutable_weight_filler()->set_value(3.);
+    mdlstm_param->set_vertical_dir(MDLSTMParameter_VerticalDirection_UP);
+    mdlstm_param->set_horizontal_dir(MDLSTMParameter_HorizontalDirection_LEFT);
+    MDLSTMLayer<Dtype> layer(layer_param);
+    GradientChecker<Dtype> checker(1e-2, 1e-3);
+    checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
+                                    this->blob_top_vec_);
+  } else {
+    LOG(ERROR) << "Skipping test due to old architecture.";
+  }
+}
+
+TYPED_TEST(MDLSTMLayerTest, TestGradient3) {
+  typedef typename TypeParam::Dtype Dtype;
+  bool IS_VALID_CUDA = false;
+#ifndef CPU_ONLY
+  IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
+#endif
+  if (Caffe::mode() == Caffe::CPU ||
+      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+    LayerParameter layer_param;
+    MDLSTMParameter* mdlstm_param =
+            layer_param.mutable_mdlstm_param();
+    mdlstm_param->set_num_hidden(2);
+    mdlstm_param->mutable_weight_filler()->set_type("gaussian");
+    // mdlstm_param->mutable_weight_filler()->set_value(3.);
+    mdlstm_param->set_vertical_dir(MDLSTMParameter_VerticalDirection_DOWN);
+    mdlstm_param->set_horizontal_dir(MDLSTMParameter_HorizontalDirection_LEFT);
+    MDLSTMLayer<Dtype> layer(layer_param);
+    GradientChecker<Dtype> checker(1e-2, 1e-3);
+    checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
+                                    this->blob_top_vec_);
+  } else {
+    LOG(ERROR) << "Skipping test due to old architecture.";
+  }
+}
+
+TYPED_TEST(MDLSTMLayerTest, TestGradient4) {
+  typedef typename TypeParam::Dtype Dtype;
+  bool IS_VALID_CUDA = false;
+#ifndef CPU_ONLY
+  IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
+#endif
+  if (Caffe::mode() == Caffe::CPU ||
+      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+    LayerParameter layer_param;
+    MDLSTMParameter* mdlstm_param =
+            layer_param.mutable_mdlstm_param();
+    mdlstm_param->set_num_hidden(2);
+    mdlstm_param->mutable_weight_filler()->set_type("gaussian");
+    // mdlstm_param->mutable_weight_filler()->set_value(3.);
+    mdlstm_param->set_vertical_dir(MDLSTMParameter_VerticalDirection_UP);
+    mdlstm_param->set_horizontal_dir(MDLSTMParameter_HorizontalDirection_RIGHT);
+    MDLSTMLayer<Dtype> layer(layer_param);
+    GradientChecker<Dtype> checker(1e-2, 1e-3);
+    checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
+                                    this->blob_top_vec_);
+  } else {
+    LOG(ERROR) << "Skipping test due to old architecture.";
+  }
+}
+
 
 }  // namespace caffe
