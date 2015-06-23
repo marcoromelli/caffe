@@ -46,6 +46,7 @@ protected:
     //virtual void compute_output_shape() = 0;
 
     int num_;  //number of hidden LSTM cells
+    int threads_; //number of thrads for parallel batch
 
     vector<shared_ptr<Blob<Dtype> > > bh_;  //activations for cell output
     vector<shared_ptr<Blob<Dtype> > > bi_;  //activations for input gate

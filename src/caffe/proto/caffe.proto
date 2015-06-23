@@ -620,6 +620,7 @@ message MDLSTMParameter {
   }
   optional VerticalDirection vertical_dir = 3 [default = DOWN];
   optional HorizontalDirection horizontal_dir = 4 [default = RIGHT];
+  optional uint32 num_threads = 5 [default = 1];
 }
 
 // Message that stores parameters used by MemoryDataLayer
