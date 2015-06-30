@@ -150,7 +150,7 @@ for (int bottom_id = 0; bottom_id < bottom.size(); ++bottom_id) {
     default:
       LOG(FATAL) << "Unknown horizontal direction.";
   }
-#ifdef _OMPENMP
+#ifdef _OPENMP
     omp_set_num_threads(threads_);
     #pragma omp parallel for
 #endif
@@ -255,12 +255,12 @@ for (int bottom_id = 0; bottom_id < bottom.size(); ++bottom_id) {
           s[e] = bi[e] * bz[e] +
                   (x != start_x ? s[idx_sx] : 0.) * bf1[e] +
                   (y != start_y ? s[idx_sy] : 0.) * bf2[e];
-//            if (isnan(s[e]) || isinf(s[e])) {
-//                LOG(INFO) << "x = " << x <<
-//                            " y = " << y << " s[" << e << "] = " << s[e] << " s[" << idx_sx << "] = " << s[idx_sx] << " s[" << idx_sy << "] = " << s[idx_sy];
-//                LOG(INFO) << x << " " << y << " " << i << bi[e] << " " << bz[e] << " bf1 = " << bf1[e] << " bf2 = " << bf2[e];
-//                char c = getchar();
-//            }
+            if (isnan(s[e]) || isinf(s[e])) {
+                LOG(INFO) << "x = " << x <<
+                            " y = " << y << " s[" << e << "] = " << s[e] << " s[" << idx_sx << "] = " << s[idx_sx] << " s[" << idx_sy << "] = " << s[idx_sy];
+                LOG(INFO) << x << " " << y << " " << i << bi[e] << " " << bz[e] << " bf1 = " << bf1[e] << " bf2 = " << bf2[e];
+                char c = getchar();
+            }
             // Clip state
             if (s[e] > 10.)
                 s[e] = 10.;
@@ -404,7 +404,7 @@ void MDLSTMLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     }
 
     const int ld_step = bottom[bottom_id]->width() * bottom[bottom_id]->height();
-#ifdef _OMPENMP
+#ifdef _OPENMP
     omp_set_num_threads(threads_);
     #pragma omp parallel for
 #endif
@@ -559,7 +559,7 @@ void MDLSTMLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     memset(Whox_diff, 0, sizeof(Dtype) * num_ * num_);
     memset(Whoy_diff, 0, sizeof(Dtype) * num_ * num_);
     const Dtype beta = 1.;
-#ifdef _OMPENMP
+#ifdef _OPENMP
     omp_set_num_threads(threads_);
     #pragma omp parallel for
 #endif
@@ -568,49 +568,49 @@ void MDLSTMLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
         for (int y = end_y; end_y == 0 ? y <= start_y : y >= start_y; y -= inc_y) {
           Dtype alpha_x = x != start_x ? -inc_x : 0.;
           Dtype alpha_y = y != start_y ? -inc_y : 0.;
-#ifdef _OMPENMP
+#ifdef _OPENMP
     #pragma omp critical(whzx)
 #endif
           strided_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, num_, num_, 1,
                   abs(alpha_x), bz_[bottom_id]->cpu_diff() + bz_[bottom_id]->offset(i, 0, x + alpha_x, y), ld_step,
                   bh_[bottom_id]->mutable_cpu_data() + bh_[bottom_id]->offset(i, 0, x, y), ld_step, beta,
                   Whzx_diff, num_);
-#ifdef _OMPENMP
+#ifdef _OPENMP
     #pragma omp critical(whzy)
 #endif
           strided_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, num_, num_, 1,
                   abs(alpha_y), bz_[bottom_id]->cpu_diff() + bz_[bottom_id]->offset(i, 0, x, y + alpha_y), ld_step,
                   bh_[bottom_id]->mutable_cpu_data() + bh_[bottom_id]->offset(i, 0, x, y), ld_step, beta,
                   Whzy_diff, num_);
-#ifdef _OMPENMP
+#ifdef _OPENMP
     #pragma omp critical(whix)
 #endif
           strided_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, num_, num_, 1,
                   abs(alpha_x), bi_[bottom_id]->cpu_diff() + bi_[bottom_id]->offset(i, 0, x + alpha_x, y), ld_step,
                   bh_[bottom_id]->mutable_cpu_data() + bh_[bottom_id]->offset(i, 0, x, y), ld_step, beta,
                   Whix_diff, num_);
-#ifdef _OMPENMP
+#ifdef _OPENMP
     #pragma omp critical(whiy)
 #endif
           strided_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, num_, num_, 1,
                   abs(alpha_y), bi_[bottom_id]->cpu_diff() + bi_[bottom_id]->offset(i, 0, x, y + alpha_y), ld_step,
                   bh_[bottom_id]->mutable_cpu_data() + bh_[bottom_id]->offset(i, 0, x, y), ld_step, beta,
                   Whiy_diff, num_);
-#ifdef _OMPENMP
+#ifdef _OPENMP
     #pragma omp critical(whf1x)
 #endif
           strided_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, num_, num_, 1,
                   abs(alpha_x), bf1_[bottom_id]->cpu_diff() + bf1_[bottom_id]->offset(i, 0, x + alpha_x, y), ld_step,
                   bh_[bottom_id]->mutable_cpu_data() + bh_[bottom_id]->offset(i, 0, x, y), ld_step, beta,
                   Whf1x_diff, num_);
-#ifdef _OMPENMP
+#ifdef _OPENMP
     #pragma omp critical(whf1y)
 #endif
           strided_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, num_, num_, 1,
                   abs(alpha_y), bf1_[bottom_id]->cpu_diff() + bf1_[bottom_id]->offset(i, 0, x, y + alpha_y), ld_step,
                   bh_[bottom_id]->mutable_cpu_data() + bh_[bottom_id]->offset(i, 0, x, y), ld_step, beta,
                   Whf1y_diff, num_);
-#ifdef _OMPENMP
+#ifdef _OPENMP
     #pragma omp critical(whf2x)
 #endif
           strided_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, num_, num_, 1,
@@ -624,14 +624,14 @@ void MDLSTMLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
                   abs(alpha_y), bf2_[bottom_id]->cpu_diff() + bf2_[bottom_id]->offset(i, 0, x, y + alpha_y), ld_step,
                   bh_[bottom_id]->mutable_cpu_data() + bh_[bottom_id]->offset(i, 0, x, y), ld_step, beta,
                   Whf2y_diff, num_);
-#ifdef _OMPENMP
+#ifdef _OPENMP
     #pragma omp critical(whox)
 #endif
           strided_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, num_, num_, 1,
                   abs(alpha_x), bo_[bottom_id]->cpu_diff() + bo_[bottom_id]->offset(i, 0, x + alpha_x, y), ld_step,
                   bh_[bottom_id]->mutable_cpu_data() + bh_[bottom_id]->offset(i, 0, x, y), ld_step, beta,
                   Whox_diff, num_);
-#ifdef _OMPENMP
+#ifdef _OPENMP
     #pragma omp critical(whoy)
 #endif
           strided_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, num_, num_, 1,
