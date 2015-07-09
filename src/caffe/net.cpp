@@ -59,6 +59,8 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
         << "Exactly one input_shape must be specified per input.";
   }
   memory_used_ = 0;
+  int num_params = 0;
+  int num_layer_params = 0;
   // set the input blobs
   for (int input_id = 0; input_id < param.input_size(); ++input_id) {
     const int layer_id = -1;  // inputs have fake layer ID -1
@@ -73,6 +75,7 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
   top_id_vecs_.resize(param.layer_size());
   bottom_need_backward_.resize(param.layer_size());
   for (int layer_id = 0; layer_id < param.layer_size(); ++layer_id) {
+    num_layer_params = 0;
     // Inherit phase from net if unset.
     if (!param.layer(layer_id).has_phase()) {
       param.mutable_layer(layer_id)->set_phase(phase_);
@@ -139,6 +142,7 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
     }
     for (int param_id = 0; param_id < num_param_blobs; ++param_id) {
       AppendParam(param, layer_id, param_id);
+      num_layer_params += layers_[layer_id]->blobs()[param_id]->count();
     }
     // Finally, set the backward flag
     layer_need_backward_.push_back(need_backward);
@@ -147,7 +151,10 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
         blob_need_backward_[top_id_vecs_[layer_id][top_id]] = true;
       }
     }
+    LOG(INFO) << "With " << num_layer_params << " trainable parameters";
+    num_params += num_layer_params;
   }
+  LOG(INFO) << "The network has total " << num_params << " trainable parameters.";
   // Go through the net backwards to determine which blobs contribute to the
   // loss.  We can skip backward computation for blobs that don't contribute
   // to the loss.
@@ -593,6 +600,10 @@ void Net<Dtype>::BackwardDebugInfo(const int layer_id) {
     LOG(INFO) << "    [Backward] "
         << "Layer " << layer_names_[layer_id] << ", param blob " << param_id
         << " diff: " << diff_abs_val_mean;
+    for (int i = 0; i < blob.count(); ++i) {
+      if (blob.cpu_diff()[i] != blob.cpu_diff()[i])
+        LOG(INFO) << "param big value: " << blob.cpu_diff()[i];
+    }
   }
 }
 

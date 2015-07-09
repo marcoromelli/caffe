@@ -8,7 +8,7 @@
 #include "boost/algorithm/string.hpp"
 #include "caffe/caffe.hpp"
 
-#define FLOAT_REALS
+//#define FLOAT_REALS
 
 #ifdef FLOAT_REALS
 typedef float real_t;
@@ -251,6 +251,10 @@ int time() {
   Timer timer;
   std::vector<double> forward_time_per_layer(layers.size(), 0.0);
   std::vector<double> backward_time_per_layer(layers.size(), 0.0);
+  // Declare maps to store detailed layers timings
+  std::map<caffe::string, std::vector<double> > forward_times;
+  std::map<caffe::string, std::vector<double> > backward_times;
+  double timer_end;
   double forward_time = 0.0;
   double backward_time = 0.0;
   for (int j = 0; j < FLAGS_iterations; ++j) {
@@ -263,7 +267,9 @@ int time() {
       // so that we will notice Reshape performance bugs.
       layers[i]->Reshape(bottom_vecs[i], top_vecs[i]);
       layers[i]->Forward(bottom_vecs[i], top_vecs[i]);
-      forward_time_per_layer[i] += timer.MicroSeconds();
+      timer_end = timer.MicroSeconds();
+      forward_time_per_layer[i] += timer_end;
+      forward_times[layers[i]->layer_param().name()].push_back(timer_end / 1000);
     }
     forward_time += forward_timer.MicroSeconds();
     backward_timer.Start();
@@ -271,7 +277,9 @@ int time() {
       timer.Start();
       layers[i]->Backward(top_vecs[i], bottom_need_backward[i],
                           bottom_vecs[i]);
-      backward_time_per_layer[i] += timer.MicroSeconds();
+      timer_end = timer.MicroSeconds();
+      backward_time_per_layer[i] += timer_end;
+      backward_times[layers[i]->layer_param().name()].push_back(timer_end / 1000);
     }
     backward_time += backward_timer.MicroSeconds();
     LOG(INFO) << "Iteration: " << j + 1 << " forward-backward time: "
@@ -296,6 +304,27 @@ int time() {
     FLAGS_iterations << " ms.";
   LOG(INFO) << "Total Time: " << total_timer.MilliSeconds() << " ms.";
   LOG(INFO) << "*** Benchmark ends ***";
+
+  LOG(INFO) << "Detailed forward times:";
+  for(auto t : forward_times) {
+    std::cout << t.first << ": ";
+    for(auto e : t.second)
+      if (e != *(t.second.end() - 1))
+        std::cout << e << ", ";
+      else
+        std::cout << e;
+    std::cout << std::endl;
+  }
+  LOG(INFO) << "Detailed backward times:";
+  for(auto t : backward_times) {
+    std::cout << t.first << ": ";
+    for(auto e : t.second)
+      if (e != *(t.second.end() - 1))
+        std::cout << e << ", ";
+      else
+        std::cout << e;
+    std::cout << std::endl;
+  }
   return 0;
 }
 RegisterBrewFunction(time);

@@ -262,10 +262,10 @@ for (int bottom_id = 0; bottom_id < bottom.size(); ++bottom_id) {
                 char c = getchar();
             }
             // Clip state
-            if (s[e] > 10.)
-                s[e] = 10.;
-            else if (s[e] < -10.)
-                s[e] = -10.;
+//            if (s[e] > 10.)
+//                s[e] = 10.;
+//            else if (s[e] < -10.)
+//                s[e] = -10.;
           idx_sx += ld_step;
           idx_sy += ld_step;
         }
