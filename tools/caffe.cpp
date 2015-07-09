@@ -306,23 +306,23 @@ int time() {
   LOG(INFO) << "*** Benchmark ends ***";
 
   LOG(INFO) << "Detailed forward times:";
-  for(auto t : forward_times) {
-    std::cout << t.first << ": ";
-    for(auto e : t.second)
-      if (e != *(t.second.end() - 1))
-        std::cout << e << ", ";
+  for(std::map<caffe::string, vector<double> >::iterator it = forward_times.begin(); it != forward_times.end(); ++it) {
+    std::cout << it->first << ": ";
+    for(std::vector<double>::iterator e = it->second.begin(); e != it->second.end(); ++e)
+      if (e != it->second.end() - 1)
+        std::cout << *e << ", ";
       else
-        std::cout << e;
+        std::cout << *e;
     std::cout << std::endl;
   }
   LOG(INFO) << "Detailed backward times:";
-  for(auto t : backward_times) {
-    std::cout << t.first << ": ";
-    for(auto e : t.second)
-      if (e != *(t.second.end() - 1))
-        std::cout << e << ", ";
+  for(std::map<caffe::string, vector<double> >::iterator it = backward_times.begin(); it != backward_times.end(); ++it) {
+    std::cout << it->first << ": ";
+    for(std::vector<double>::iterator e = it->second.begin(); e != it->second.end(); ++e)
+      if (e != it->second.end() - 1)
+        std::cout << *e << ", ";
       else
-        std::cout << e;
+        std::cout << *e;
     std::cout << std::endl;
   }
   return 0;
