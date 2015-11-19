@@ -201,8 +201,8 @@ int train() {
         GetRequestedAction(FLAGS_sigint_effect),
         GetRequestedAction(FLAGS_sighup_effect));
 
-  shared_ptr<caffe::Solver<float> >
-      solver(caffe::SolverRegistry<float>::CreateSolver(solver_param));
+  shared_ptr<caffe::Solver<real_t> >
+      solver(caffe::SolverRegistry<real_t>::CreateSolver(solver_param));
 
   solver->SetActionFunction(signal_handler.GetActionFunction());
 
@@ -214,7 +214,7 @@ int train() {
   }
 
   if (gpus.size() > 1) {
-    caffe::P2PSync<float> sync(solver, NULL, solver->param());
+    caffe::P2PSync<real_t> sync(solver, NULL, solver->param());
     sync.run(gpus);
   } else {
     LOG(INFO) << "Starting Optimization";
@@ -278,7 +278,7 @@ int test() {
   for (int i = 0; i < test_score.size(); ++i) {
     const std::string& output_name = caffe_net.blob_names()[
         caffe_net.output_blob_indices()[test_score_output_id[i]]];
-    const float loss_weight = caffe_net.blob_loss_weights()[
+    const real_t loss_weight = caffe_net.blob_loss_weights()[
         caffe_net.output_blob_indices()[test_score_output_id[i]]];
     std::ostringstream loss_msg_stream;
     const real_t mean_score = test_score[i] / FLAGS_iterations;
