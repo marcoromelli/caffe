@@ -1,14 +1,15 @@
 # Caffe with MDLSTM extension
 
-This fork of Caffe add support for the Multi-Dimensional LSTM layer proposed by Alex Graves ([arXiv](https://arxiv.org/abs/0705.2011)).
+This fork of Caffe adds support for the Multi-Dimensional LSTM layer proposed by Alex Graves ([arXiv](https://arxiv.org/abs/0705.2011)).
+
 The main contribution is in the `MDLSTMLayer.cpp` which implememnts a CPU parallel version of the layer based on OpenMP.
 The code should compile without problems on Linux and MacOS (be careful though because Mac doesn't have OpenMP support by default).
 
-Currently there is no GPU implementation for this layer and any suggestion/help is appreciated (write to 91snake91 (at) gmail (dot) com).
+Currently there is no GPU implementation for this layer and any suggestion/help is appreciated (write to 91snake91(at)gmail(dot)com).
 
 ## Example usage
-The layer is called `MDLSTM` in the protobuf definition. A full example can be found in the `example/mnist/mdlstm` folder.
-
+The layer is called `MDLSTM` in the protobuf definition. A full example can be found in the `examples/mnist/mdlstm` folder.
+Refer to the `caffe.proto` file for the full list of available params.
 
 ## License and Citation
 
